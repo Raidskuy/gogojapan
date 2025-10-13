@@ -1,0 +1,195 @@
+/* Reset dasar dan font */
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+/* Pengaturan Grid Container */
+.grid-container {
+    display: grid;
+    /* Secara default 2 kolom untuk layar HP */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem; /* Jarak antar kotak */
+    padding: 1rem;
+    max-width: 1200px;
+    margin: 0 auto; /* Agar ke tengah di layar besar */
+}
+
+/* Pengaturan untuk setiap item di grid */
+.grid-item {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0.5rem;
+    aspect-ratio: 1 / 1; /* Membuat kotak tetap persegi */
+    text-decoration: none;
+    color: #444;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: transform 0.2s;
+}
+
+.grid-item:hover {
+    transform: scale(1.05);
+}
+
+/* === BAGIAN RESPONSIVE === */
+
+/* Untuk layar tablet (lebar minimal 640px), ubah jadi 3 kolom */
+@media (min-width: 640px) {
+    .grid-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Untuk layar laptop (lebar minimal 1024px), ubah jadi 5 kolom */
+@media (min-width: 1024px) {
+    .grid-container {
+        grid-template-columns: repeat(5, 1fr);
+    }
+    .grid-item {
+        font-size: 1rem;
+    }
+}
+/* === Gaya untuk Halaman Detail === */
+.lesson-content {
+    padding: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse; /* Menghilangkan spasi antar border */
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+thead {
+    background-color: #4A90E2;
+    color: white;
+    font-weight: bold;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Memberi warna selang-seling */
+}
+
+/* === Gaya untuk Tombol Latihan === */
+.quiz-button {
+    display: block;
+    width: 200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background-color: #28a745;
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: background-color 0.2s;
+}
+.quiz-button:hover {
+    background-color: #218838;
+}
+
+/* === Gaya untuk Halaman Kuis === */
+.quiz-container {
+    padding: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+#score-board {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+}
+#question-card {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#question-text {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+.options-container {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+.option-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.option-button:hover {
+    background-color: #0056b3;
+}
+
+/* === Gaya untuk Kontainer Tombol Latihan === */
+.quiz-buttons-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+/* === Gaya untuk Tombol yang Dinonaktifkan === */
+.quiz-button.disabled {
+    background-color: #a0a0a0; /* Warna abu-abu */
+    cursor: not-allowed; /* Ubah cursor mouse */
+    pointer-events: none; /* Mencegah tombol di-klik */
+}
+.quiz-button.disabled:hover {
+    background-color: #a0a0a0; /* Warna tetap sama saat di-hover */
+}
+
+/* === Gaya untuk Status Jawaban Kuis === */
+.option-button.correct {
+    background-color: #28a745; /* Hijau */
+    color: white;
+}
+
+.option-button.incorrect {
+    background-color: #dc3545; /* Merah */
+    color: white;
+}
+
+/* Membuat tombol lain menjadi redup saat jawaban dipilih */
+.option-button.disabled {
+    opacity: 0.5;
+}
