@@ -11,8 +11,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        // Note: folder in workspace is `Data/Database.json` (capitalized). Use that path.
-        const response = await fetch('./Data/Database.json');
+    // Note: folder in workspace is `Data/Database.json` (capitalized). Use that path.
+    // From Lesson/lesson.js, the relative path to project root is '../Data/Database.json'
+    const response = await fetch('../Data/Database.json');
         const database = await response.json();
 
         const allLessons = [
@@ -97,19 +98,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Tombol 1: Hiragana -> Arti
         const button1 = document.createElement('a');
-        button1.href = `quiz.html?id=${lessonId}&type=hira_to_arti`;
+        button1.href = `../Quiz/quiz.html?id=${lessonId}&type=hira_to_arti`;
         button1.className = 'quiz-button';
         button1.textContent = 'Latihan: Hiragana -> Arti';
         
         // Tombol 2: Kanji -> Hiragana
         const button2 = document.createElement('a');
-        button2.href = `quiz.html?id=${lessonId}&type=kanji_to_hira`;
+        button2.href = `../Quiz/quiz.html?id=${lessonId}&type=kanji_to_hira`;
         button2.className = 'quiz-button';
         button2.textContent = 'Latihan: Kanji -> Hiragana';
 
         // Tombol 3: Kanji -> Arti
         const button3 = document.createElement('a');
-        button3.href = `quiz.html?id=${lessonId}&type=kanji_to_arti`;
+        button3.href = `../Quiz/quiz.html?id=${lessonId}&type=kanji_to_arti`;
         button3.className = 'quiz-button';
         button3.textContent = 'Latihan: Kanji -> Arti';
 

@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadData() {
         try {
-            const response = await fetch('./data/database.json');
+            // Quiz is in Quiz/ so Data is one level up: ../Data/Database.json
+            const response = await fetch('../Data/Database.json');
             const database = await response.json();
             
             const allLessons = [...database.kotoba, ...(database.unit || []), ...(database.kotoba2 || []), ...(database.full || [])];
@@ -52,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         isAnswered = false; // Siapkan untuk pertanyaan baru
         if (currentQuestionIndex >= currentLessonData.length) {
             questionText.textContent = "Kuis Selesai!";
-            optionsContainer.innerHTML = `<a href="index.html" class="quiz-button">Kembali ke Home</a>`;
+            optionsContainer.innerHTML = `<a href="../index.html" class="quiz-button">Kembali ke Home</a>`;
             return;
         }
 
