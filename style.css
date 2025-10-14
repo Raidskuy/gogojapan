@@ -13,18 +13,16 @@ header h1 {
     margin: 2rem 0;
 }
 
-/* Pengaturan Grid Container */
+/* === REVISI 1: Grid utama selalu 5 kolom === */
 .grid-container {
     display: grid;
-    /* Secara default 2 kolom untuk layar HP */
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem; /* Jarak antar kotak */
-    padding: 1rem;
+    grid-template-columns: repeat(5, 1fr); /* Selalu 5 kolom */
+    gap: 0.5rem; /* Jarak antar kotak diperkecil */
+    padding: 0.5rem;
     max-width: 1200px;
-    margin: 0 auto; /* Agar ke tengah di layar besar */
+    margin: 0 auto;
 }
 
-/* Pengaturan untuk setiap item di grid */
 .grid-item {
     background-color: white;
     border-radius: 8px;
@@ -33,12 +31,12 @@ header h1 {
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 0.5rem;
-    aspect-ratio: 1 / 1; /* Membuat kotak tetap persegi */
+    padding: 0.25rem;
+    aspect-ratio: 1 / 1;
     text-decoration: none;
     color: #444;
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.7rem; /* Ukuran font disesuaikan agar muat */
     transition: transform 0.2s;
 }
 
@@ -46,25 +44,7 @@ header h1 {
     transform: scale(1.05);
 }
 
-/* === BAGIAN RESPONSIVE === */
-
-/* Untuk layar tablet (lebar minimal 640px), ubah jadi 3 kolom */
-@media (min-width: 640px) {
-    .grid-container {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-/* Untuk layar laptop (lebar minimal 1024px), ubah jadi 5 kolom */
-@media (min-width: 1024px) {
-    .grid-container {
-        grid-template-columns: repeat(5, 1fr);
-    }
-    .grid-item {
-        font-size: 1rem;
-    }
-}
-/* === Gaya untuk Halaman Detail === */
+/* Gaya untuk Halaman Detail */
 .lesson-content {
     padding: 1rem;
     max-width: 800px;
@@ -73,7 +53,7 @@ header h1 {
 
 table {
     width: 100%;
-    border-collapse: collapse; /* Menghilangkan spasi antar border */
+    border-collapse: collapse;
     background-color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -91,14 +71,21 @@ thead {
 }
 
 tbody tr:nth-child(even) {
-    background-color: #f9f9f9; /* Memberi warna selang-seling */
+    background-color: #f9f9f9;
 }
 
-/* === Gaya untuk Tombol Latihan === */
+/* Gaya untuk Kontainer Tombol Latihan */
+.quiz-buttons-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
 .quiz-button {
     display: block;
     width: 200px;
-    margin: 2rem auto;
     padding: 1rem;
     background-color: #28a745;
     color: white;
@@ -112,8 +99,16 @@ tbody tr:nth-child(even) {
 .quiz-button:hover {
     background-color: #218838;
 }
+.quiz-button.disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.quiz-button.disabled:hover {
+    background-color: #a0a0a0;
+}
 
-/* === Gaya untuk Halaman Kuis === */
+/* Gaya untuk Halaman Kuis */
 .quiz-container {
     padding: 1rem;
     max-width: 600px;
@@ -139,12 +134,15 @@ tbody tr:nth-child(even) {
     font-size: 2.5rem;
     font-weight: bold;
 }
+
+/* === REVISI 2: Pilihan kuis menjadi satu baris/kolom === */
 .options-container {
     margin-top: 2rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex; /* Menggunakan flexbox */
+    flex-direction: column; /* Menjadi satu kolom vertikal */
     gap: 1rem;
 }
+
 .option-button {
     background-color: #007bff;
     color: white;
@@ -154,42 +152,69 @@ tbody tr:nth-child(even) {
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.2s;
+    text-align: left; /* Teks rata kiri */
+    padding-left: 20px;
 }
 .option-button:hover {
     background-color: #0056b3;
 }
 
-/* === Gaya untuk Kontainer Tombol Latihan === */
-.quiz-buttons-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 2rem;
-}
-
-/* === Gaya untuk Tombol yang Dinonaktifkan === */
-.quiz-button.disabled {
-    background-color: #a0a0a0; /* Warna abu-abu */
-    cursor: not-allowed; /* Ubah cursor mouse */
-    pointer-events: none; /* Mencegah tombol di-klik */
-}
-.quiz-button.disabled:hover {
-    background-color: #a0a0a0; /* Warna tetap sama saat di-hover */
-}
-
-/* === Gaya untuk Status Jawaban Kuis === */
+/* Gaya untuk Status Jawaban Kuis */
 .option-button.correct {
-    background-color: #28a745; /* Hijau */
+    background-color: #28a745;
     color: white;
 }
-
 .option-button.incorrect {
-    background-color: #dc3545; /* Merah */
+    background-color: #dc3545;
     color: white;
 }
-
-/* Membuat tombol lain menjadi redup saat jawaban dipilih */
 .option-button.disabled {
     opacity: 0.5;
+}
+/* === Gaya BARU untuk Pilihan Tipe Kuis === */
+.quiz-section-title {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.quiz-buttons-container-horizontal {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.quiz-button-choice {
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 1rem;
+    width: 150px;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.quiz-button-choice:hover {
+    transform: scale(1.05);
+}
+
+.quiz-button-choice span {
+    display: block;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.quiz-button-choice p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.quiz-button-choice.disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+    pointer-events: none;
 }

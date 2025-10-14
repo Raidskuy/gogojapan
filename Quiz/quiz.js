@@ -5,44 +5,58 @@ document.addEventListener('DOMContentLoaded', async () => {
     const scoreBoard = document.getElementById('score-board');
 
     let currentLessonData = [];
-    let allVocabulary = { meanings: [], hiraganas: [] };
     let currentQuestionIndex = 0;
     let score = 0;
-    let isAnswered = false; // Mencegah klik ganda
+    let isAnswered = false;
 
     const params = new URLSearchParams(window.location.search);
     const lessonId = params.get('id');
     const quizType = params.get('type');
 
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+    
     async function loadData() {
         try {
-            // Quiz is in Quiz/ so Data is one level up: ../Data/Database.json
             const response = await fetch('../Data/Database.json');
             const database = await response.json();
             
-            const allLessons = [...database.kotoba, ...(database.unit || []), ...(database.kotoba2 || []), ...(database.full || [])];
+            const allLessons = [
+                ...database.kotoba,
+                ...(database.unit || []),
+                ...(database.kotoba2 || []),
+                ...(database.full || []),
+            ];
+
             const lesson = allLessons.find(l => l.id_bagian == lessonId);
 
-            if (lesson) {
+            if (lesson && lesson.data) {
                 quizTitle.textContent = `${lesson.nama_bagian}`;
-                currentLessonData = lesson.data.filter(item => (item.kanji || item.Kanji) || (item.hiragana || item.Hiragana));
+                
+                const validQuizData = lesson.data.filter(item => 
+                    (item.kanji || item.Kanji) && (item.hiragana || item.Hiragana) && (item.arti || item.Arti)
+                );
+
+                shuffleArray(validQuizData);
+                currentLessonData = validQuizData;
+                
+                startQuiz();
+            } else {
+                 questionText.textContent = "Materi tidak ditemukan atau tidak valid untuk kuis.";
             }
-            
-            allLessons.forEach(l => {
-                if (l.data) {
-                    l.data.forEach(item => {
-                        const arti = item.arti || item.Arti;
-                        const hiragana = item.hiragana || item.Hiragana;
-                        if (arti) allVocabulary.meanings.push(arti);
-                        if (hiragana) allVocabulary.hiraganas.push(hiragana);
-                    });
-                }
-            });
-            startQuiz();
         } catch (error) { console.error("Gagal memuat data:", error); }
     }
 
     function startQuiz() {
+        if (currentLessonData.length === 0) {
+            questionText.textContent = "Tidak ada soal yang bisa dibuat dari materi ini.";
+            optionsContainer.innerHTML = `<a href="../index.html" class="quiz-button">Kembali ke Home</a>`;
+            return;
+        }
         currentQuestionIndex = 0;
         score = 0;
         updateScore();
@@ -50,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function showNextQuestion() {
-        isAnswered = false; // Siapkan untuk pertanyaan baru
+        isAnswered = false;
         if (currentQuestionIndex >= currentLessonData.length) {
             questionText.textContent = "Kuis Selesai!";
             optionsContainer.innerHTML = `<a href="../index.html" class="quiz-button">Kembali ke Home</a>`;
@@ -68,77 +82,78 @@ document.addEventListener('DOMContentLoaded', async () => {
             case 'hira_to_arti':
                 question = itemHiragana;
                 correctAnswer = itemArti;
-                options = generateOptions(correctAnswer, 'meanings');
+                options = generateOptions(correctAnswer, 'arti');
                 break;
             case 'kanji_to_hira':
                 question = itemKanji;
                 correctAnswer = itemHiragana;
-                options = generateOptions(correctAnswer, 'hiraganas');
+                options = generateOptions(correctAnswer, 'hiragana');
                 break;
             case 'kanji_to_arti':
             default:
                 question = itemKanji;
                 correctAnswer = itemArti;
-                options = generateOptions(correctAnswer, 'meanings');
+                options = generateOptions(correctAnswer, 'arti');
                 break;
         }
         
-        questionText.textContent = question || "Soal tidak valid";
+        questionText.textContent = question || "?";
 
         optionsContainer.innerHTML = '';
+        // === REVISI: Menghapus label A, B, C, D ===
         options.forEach(option => {
             const button = document.createElement('button');
             button.className = 'option-button';
-            button.textContent = option;
-            // --- PERUBAHAN 1: Mengirim elemen tombol saat di-klik ---
+            button.textContent = option; // Hanya menampilkan teks jawaban
             button.onclick = () => checkAnswer(button, option, correctAnswer);
             optionsContainer.appendChild(button);
         });
     }
 
-    function generateOptions(correctAnswer, optionType) {
-        const sourceArray = allVocabulary[optionType];
+    function generateOptions(correctAnswer, optionProperty) {
         let options = [correctAnswer];
-        while (options.length < 4 && sourceArray.length > 4) {
-            const randomAnswer = sourceArray[Math.floor(Math.random() * sourceArray.length)];
-            if (!options.includes(randomAnswer)) {
-                options.push(randomAnswer);
+        const wrongAnswerPool = currentLessonData
+            .map(item => item[optionProperty] || item[optionProperty.charAt(0).toUpperCase() + optionProperty.slice(1)])
+            .filter(value => value && value !== correctAnswer);
+
+        shuffleArray(wrongAnswerPool);
+
+        for (let i = 0; i < wrongAnswerPool.length && options.length < 4; i++) {
+            if (!options.includes(wrongAnswerPool[i])) {
+                options.push(wrongAnswerPool[i]);
             }
         }
+        
+        while (options.length < 4) {
+            options.push("---");
+        }
+
         return options.sort(() => Math.random() - 0.5);
     }
 
-    // --- REVISI UTAMA: Logika baru untuk memeriksa jawaban dan mengubah warna ---
     function checkAnswer(selectedButton, selectedAnswer, correctAnswer) {
-        if (isAnswered) return; // Jika sudah dijawab, jangan lakukan apa-apa
+        if (isAnswered) return;
         isAnswered = true;
 
         const allButtons = optionsContainer.querySelectorAll('.option-button');
-        
-        if (selectedAnswer === correctAnswer) {
-            // Jawaban BENAR
+        const isCorrect = selectedAnswer === correctAnswer;
+
+        if (isCorrect) {
             selectedButton.classList.add('correct');
-            score += 10;
+            score += Math.round(100 / currentLessonData.length);
             updateScore();
         } else {
-            // Jawaban SALAH
             selectedButton.classList.add('incorrect');
-            // Tunjukkan juga jawaban yang benar
             allButtons.forEach(btn => {
+                // Perbaikan: Mencocokkan teks secara langsung
                 if (btn.textContent === correctAnswer) {
                     btn.classList.add('correct');
                 }
             });
         }
         
-        // Nonaktifkan tombol lain
-        allButtons.forEach(btn => {
-            if (btn !== selectedButton && btn.textContent !== correctAnswer) {
-                btn.classList.add('disabled');
-            }
-        });
+        allButtons.forEach(btn => btn.disabled = true);
 
-        // Jeda 1.5 detik, lalu lanjut ke pertanyaan berikutnya
         setTimeout(() => {
             currentQuestionIndex++;
             showNextQuestion();

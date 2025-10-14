@@ -6,14 +6,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const lessonId = params.get('id');
 
     if (!lessonId) {
-        // ... (kode error tetap sama)
+        lessonTitle.textContent = "Error";
+        lessonContent.textContent = "ID pelajaran tidak ditemukan.";
         return;
     }
 
     try {
-    // Note: folder in workspace is `Data/Database.json` (capitalized). Use that path.
-    // From Lesson/lesson.js, the relative path to project root is '../Data/Database.json'
-    const response = await fetch('../Data/Database.json');
+        const response = await fetch('../Data/Database.json');
         const database = await response.json();
 
         const allLessons = [
@@ -28,63 +27,53 @@ document.addEventListener('DOMContentLoaded', async () => {
             ...(database.unit || []),
         ];
 
-    const lesson = allLessons.find(l => l.id_bagian == lessonId);
+        const lesson = allLessons.find(l => l.id_bagian == lessonId);
 
         if (!lesson) {
-            // ... (kode error tetap sama)
+            lessonTitle.textContent = "Error";
+            lessonContent.textContent = "Pelajaran tidak ditemukan.";
             return;
         }
 
-        if (!lessonTitle || !lessonContent) {
-            console.error('Missing DOM elements: #lesson-title or #lesson-content');
-            return;
-        }
-
-        lessonTitle.textContent = lesson.nama_bagian || '';
+        lessonTitle.textContent = lesson.nama_bagian;
         
-        // ... (kode untuk membuat tabel materi tetap sama persis seperti sebelumnya) ...
         const table = document.createElement('table');
         const thead = document.createElement('thead');
         const tbody = document.createElement('tbody');
-        // Ensure lesson.data is an array to avoid runtime errors
-        const lessonData = Array.isArray(lesson.data) ? lesson.data : [];
 
-        if (lesson.tipe === 'kotoba' || lesson.tipe === 'k') {
+        if (lesson.tipe === 'kotoba' || lesson.tipe === 'k' || lesson.tipe === 'u') {
             thead.innerHTML = '<tr><th>Kanji</th><th>Hiragana</th><th>Arti</th></tr>';
-            lessonData.forEach(item => {
+            lesson.data.forEach(item => {
                 tbody.innerHTML += `<tr><td>${item.Kanji || item.kanji || ''}</td><td>${item.Hiragana || item.hiragana || ''}</td><td>${item.Arti || item.arti || ''}</td></tr>`;
             });
         } 
         else if (lesson.tipe === 'jt') {
              thead.innerHTML = '<tr><th>Jidoushi (Keadaan)</th><th>Tadoushi (Aksi)</th></tr>';
-            lessonData.forEach(item => {
-                // Normalize possible key names and avoid trailing-space keys
-                const jidoushiArti = item.jidoushi_arti || item.jidoushiArti || item['jidoushi_arti'] || '';
-                const tadoushiArti = item.tadoushi_arti || item.tadoushiArti || item['tadoushi_arti'] || '';
-                const jidoushiText = `${item.jidoushi_kanji || ''} (${item.jidoushi_hiragana || ''}): ${jidoushiArti}`;
-                const tadoushiText = `${item.tadoushi_kanji || ''} (${item.tadoushi_bentuk_formal || item.tadoushi_bentuk || ''}): ${tadoushiArti}`;
+            lesson.data.forEach(item => {
+                const jidoushiText = `${item.jidoushi_kanji || ''} (${item.jidoushi_hiragana || ''}): ${item['jidoushi_arti '] || ''}`;
+                const tadoushiText = `${item.tadoushi_kanji || ''} (${item.tadoushi_bentuk_formal || ''}): ${item['tadoushi_arti '] || ''}`;
                 tbody.innerHTML += `<tr><td>${jidoushiText}</td><td>${tadoushiText}</td></tr>`;
             });
         }
         else if (lesson.tipe === 'ku') {
             thead.innerHTML = '<tr><th>Kotoba</th><th>Arti</th></tr>';
-            lessonData.forEach(item => {
-                tbody.innerHTML += `<tr><td>${item.kotoba || item.Kotoba || ''}</td><td>${item.arti || item.Arti || ''}</td></tr>`;
+            lesson.data.forEach(item => {
+                tbody.innerHTML += `<tr><td>${item.kotoba || ''}</td><td>${item['arti '] || ''}</td></tr>`;
             });
         }
         else if (lesson.tipe === 'gkk' || lesson.tipe === 'kk') {
              thead.innerHTML = '<tr><th>Kata</th><th>Arti</th><th>Contoh Kalimat</th></tr>';
-             lessonData.forEach(item => {
-                const kata = item.Kata || item['Kanji Kerja'] || item.kata || '';
-                const arti = item.Arti || item.Artinya || item.arti || '';
-                const contoh = item.Contoh || item['Contoh Kalimat'] || item.contoh || '';
+             lesson.data.forEach(item => {
+                const kata = item.Kata || item['Kanji Kerja'] || '';
+                const arti = item.Arti || item.Artinya || '';
+                const contoh = item.Contoh || item['Contoh Kalimat'] || '';
                 tbody.innerHTML += `<tr><td>${kata}</td><td>${arti}</td><td>${contoh}</td></tr>`;
             });
         }
         else if (lesson.tipe === 'p') {
             thead.innerHTML = '<tr><th>Bentuk Dasar</th><th>Arti</th></tr>';
-            lessonData.forEach(item => {
-                tbody.innerHTML += `<tr><td>${item['Bentuk Dasar'] || item.bentuk_dasar || ''}</td><td>${item.Arti || item.arti || ''}</td></tr>`;
+            lesson.data.forEach(item => {
+                tbody.innerHTML += `<tr><td>${item['Bentuk Dasar'] || ''}</td><td>${item.Arti || ''}</td></tr>`;
             });
         }
         
@@ -93,51 +82,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         lessonContent.appendChild(table);
 
         // --- REVISI UTAMA: Membuat Kontainer untuk Tombol Kuis ---
+        const quizSectionTitle = document.createElement('h2');
+        quizSectionTitle.className = 'quiz-section-title';
+        quizSectionTitle.textContent = 'Pilih Tipe Latihan';
+        lessonContent.appendChild(quizSectionTitle);
+
         const quizButtonsContainer = document.createElement('div');
-        quizButtonsContainer.className = 'quiz-buttons-container';
+        quizButtonsContainer.className = 'quiz-buttons-container-horizontal';
 
-        // Tombol 1: Hiragana -> Arti
-        const button1 = document.createElement('a');
-        button1.href = `../Quiz/quiz.html?id=${lessonId}&type=hira_to_arti`;
-        button1.className = 'quiz-button';
-        button1.textContent = 'Latihan: Hiragana -> Arti';
-        
-        // Tombol 2: Kanji -> Hiragana
-        const button2 = document.createElement('a');
-        button2.href = `../Quiz/quiz.html?id=${lessonId}&type=kanji_to_hira`;
-        button2.className = 'quiz-button';
-        button2.textContent = 'Latihan: Kanji -> Hiragana';
+        const quizTypes = [
+            { type: 'hira_to_arti', label: 'A', desc: 'Hiragana → Arti' },
+            { type: 'kanji_to_hira', label: 'B', desc: 'Kanji → Hiragana' },
+            { type: 'kanji_to_arti', label: 'C', desc: 'Kanji → Arti' },
+        ];
 
-        // Tombol 3: Kanji -> Arti
-        const button3 = document.createElement('a');
-        button3.href = `../Quiz/quiz.html?id=${lessonId}&type=kanji_to_arti`;
-        button3.className = 'quiz-button';
-        button3.textContent = 'Latihan: Kanji -> Arti';
+        quizTypes.forEach(q => {
+            const button = document.createElement('a');
+            button.href = `../Quiz/quiz.html?id=${lessonId}&type=${q.type}`;
+            button.className = 'quiz-button-choice';
+            button.innerHTML = `<span>${q.label}</span><p>${q.desc}</p>`;
+            
+            // Logika menonaktifkan tombol
+            if ((q.type === 'kanji_to_hira' || q.type === 'kanji_to_arti') && (lesson.tipe === 'ku' || !lesson.data.some(item => item.kanji || item.Kanji))) {
+                button.classList.add('disabled');
+            }
+             if (lesson.tipe === 'jt' || lesson.tipe === 'p') {
+                button.classList.add('disabled');
+            }
 
-        // Logika untuk menonaktifkan tombol jika tidak relevan
-        // Disable irrelevant quiz buttons by removing their href and marking aria-disabled
-        function disableButton(btn) {
-            btn.classList.add('disabled');
-            btn.setAttribute('aria-disabled', 'true');
-            // remove href to avoid navigation
-            btn.removeAttribute('href');
-            // prevent clicks just in case
-            btn.addEventListener('click', (e) => e.preventDefault());
-        }
+            quizButtonsContainer.appendChild(button);
+        });
 
-        if (lesson.tipe === 'ku') { // Kata Unik tidak punya kanji
-            disableButton(button2);
-            disableButton(button3);
-        }
-        if (lesson.tipe === 'jt' || lesson.tipe === 'p') { // Jidoushi & Perubahan tidak cocok untuk kuis simpel
-            disableButton(button1);
-            disableButton(button2);
-            disableButton(button3);
-        }
-
-        quizButtonsContainer.appendChild(button1);
-        quizButtonsContainer.appendChild(button2);
-        quizButtonsContainer.appendChild(button3);
         lessonContent.appendChild(quizButtonsContainer);
 
     } catch (error) {
