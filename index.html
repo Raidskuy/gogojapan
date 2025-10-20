@@ -3,16 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kanji App</title>
+    <title>OtwJapan App</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header>
-        <h1>Kanji App</h1>
+        <h1>OtwJapan App</h1>
     </header>
 
-    <main id="grid-container" class="grid-container">
+    <main id="level-selection" class="level-container">
+        <h2>Pilih Level</h2>
+        <div class="level-options">
+            <a href="#" class="level-button" data-level="n5">Materi N5</a>
+            <a href="#" class="level-button" data-level="n4">Materi N4</a>
+            <a href="#" class="level-button" data-level="n3">Materi N3</a>
+        </div>
+    </main>
+
+    <main id="grid-container" class="grid-container" style="display: none;">
         </main>
 
     <script src="script.js"></script>
