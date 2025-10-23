@@ -22,11 +22,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     async function loadData() {
         try {
-            const response = await fetch('../Data/Database.json');
+            // Path sudah benar, naik 2 level ke root, lalu masuk ke Data/N3
+            const response = await fetch('../../Data/N3/kanjidbn3.json');
             const database = await response.json();
             
             const allLessons = [
-                ...database.kotoba,
+                ...(database.kotoba || []),
                 ...(database.unit || []),
                 ...(database.kotoba2 || []),
                 ...(database.full || []),
@@ -54,7 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     function startQuiz() {
         if (currentLessonData.length === 0) {
             questionText.textContent = "Tidak ada soal yang bisa dibuat dari materi ini.";
-            optionsContainer.innerHTML = `<a href="../index.html" class="quiz-button">Kembali ke Home</a>`;
+            // Path sudah benar, naik 2 level ke index.html di root
+            optionsContainer.innerHTML = `<a href="../../index.html" class="quiz-button">Kembali ke Home</a>`;
             return;
         }
         currentQuestionIndex = 0;
@@ -67,7 +69,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         isAnswered = false;
         if (currentQuestionIndex >= currentLessonData.length) {
             questionText.textContent = "Kuis Selesai!";
-            optionsContainer.innerHTML = `<a href="../index.html" class="quiz-button">Kembali ke Home</a>`;
+            // Path sudah benar, naik 2 level ke index.html di root
+            optionsContainer.innerHTML = `<a href="../../index.html" class="quiz-button">Kembali ke Home</a>`;
             return;
         }
 
@@ -100,11 +103,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         questionText.textContent = question || "?";
 
         optionsContainer.innerHTML = '';
-        // === REVISI: Menghapus label A, B, C, D ===
         options.forEach(option => {
             const button = document.createElement('button');
             button.className = 'option-button';
-            button.textContent = option; // Hanya menampilkan teks jawaban
+            button.textContent = option;
             button.onclick = () => checkAnswer(button, option, correctAnswer);
             optionsContainer.appendChild(button);
         });
@@ -145,7 +147,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             selectedButton.classList.add('incorrect');
             allButtons.forEach(btn => {
-                // Perbaikan: Mencocokkan teks secara langsung
                 if (btn.textContent === correctAnswer) {
                     btn.classList.add('correct');
                 }
